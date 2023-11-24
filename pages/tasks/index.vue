@@ -32,8 +32,9 @@
       <OnReview v-else />
     </div>
   </div>
+  
   <BaseModal
-    :width="600"
+    :width= "!isQuestModalOpen ? 600 : 520"
     :top="10"
     :rightCustom="10"
     :bottom="10"
@@ -44,8 +45,26 @@
     @openConfirmationModal="isConfirmModalOpen = true"
     isConfirm
   >
-    <CreateTask :typeTask="typeTask" @close="handleClose(false)" />
+
+    <CreateTask v-if="!isQuestModalOpen" :typeTask="typeTask" @close="handleClose(false)" />
+    <CreateQuest v-else  @click=" handleCloseQuest(false) "/>
+
   </BaseModal>
+  
+  <!-- <BaseModal
+    :width="600"
+    :top="10"
+    :rightCustom="10"
+    :bottom="10"
+    customHeight="auto"
+    @close="handleCloseConfirm($event)"
+    :visible="isQuestModalOpen"
+    @openConfirmationModal="isQuestModalOpen = true"
+    btnLeft
+    isConfirm
+  >
+    <CreateQuest @click=" handleCloseQuest(false) "/>
+  </BaseModal> -->
   <BaseModal
     isCloseBtnInvisible
     :width="480"
@@ -106,11 +125,11 @@ const types = [
     label: 'On-Chain',
     id: 'on-chain',
   },
-  // {
-  //   name: 'Quest',
-  //   label: 'Quest',
-  //   id: 'quest',
-  // },
+  {
+    name: 'Quest',
+    label: 'Quest',
+    id: 'quest',
+  },
 ];
 
 const {
@@ -163,6 +182,7 @@ const overviewStatus = ref(false);
 const visible = ref(null);
 const typeTask = ref(false);
 const isConfirmModalOpen = ref(false);
+const isQuestModalOpen = ref(false);
 const searchInterval = ref(null);
 const id = ref(0);
 const taskTabId = ref(0);
@@ -174,11 +194,18 @@ const handleClose = (value) => {
 };
 const handleOpen = (value, type) => {
   typeTask.value = type;
+  console.log(typeTask._rawValue.id);
+  if(typeTask._rawValue.id =='quest'){
+    isQuestModalOpen.value = true
+  }
   visible.value = value;
 };
 
 const handleCloseConfirm = (value) => {
   isConfirmModalOpen.value = value;
+};
+const handleCloseQuest = (value) => {
+  isQuestModalOpen.value = false
 };
 
 const pagData = reactive({
