@@ -47,7 +47,7 @@
   >
 
     <CreateTask v-if="!isQuestModalOpen" :typeTask="typeTask" @close="handleClose(false)" />
-    <CreateQuest v-else  @click=" handleCloseQuest(false) "/>
+    <CreatCarousel v-else  @click=" handleCloseQuest(false) "/>
 
   </BaseModal>
   

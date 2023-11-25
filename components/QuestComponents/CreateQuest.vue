@@ -6,37 +6,24 @@
     <TransitionGroup name="list" tag="ul" appear>
       <div v-for="(item) in cardItems" :key="item.id" class="card-carousel-item" transition="fade">
 
-        <button class="btn-delete" @click="deleteCardItem(item.id)">Delete Card</button>
-        <!-- <UploaderButton
-          @changeError="handleImageError"
+        <button 
+        class="btn-delete" 
+        @click="deleteCardItem(item.id)"
+        >Delete Card
+      </button>
+        <UploaderButton 
+          @changeError="handleImageError" 
+          v-model="item.images" 
           :imagesFiles="images"
-          @images="images = $event"
-        /> -->
-        
-        <!-- <ul v-if="images.length">
-          <li v-for="(image, index) in images" :key="index">
-            <img :src="fileUrl(image)" alt="Selected Image" style="max-width: 200px; max-height: 200px;" />
-          </li>
-        </ul> -->
-        <div class="upload-img">
-          <button class="btn-upload-img">
-            <button class="btn-text">
-              Add Image
-            </button>
-              <Icon name="Add" :size="20" />
-          </button>
-          <TooltipIcon tooltipText="Add an image if necessary. Recommended size - 320 x 320 px. PNG, JPEG, PDF. Maximum 10 MB." />
-        </div>
+          @images="updateImages(item.id, $event)" 
+        />
         <div class="input-custom">
           <Input v-model="item.title" :name="''" :placeholder="'Card title'" />
         </div>
         <div class="input-custom">
           <TextArea v-model="item.description" :placeholder="'Description (optional)'" />
         </div>
-
       </div>
-      
-      
       <button class="btn-add-card" @click="addCardItem">
         <div class="btn-text">Add Card</div>
         <Icon name="Add" :size="20" />
@@ -47,40 +34,49 @@
 </template>
   
 <script setup>
-const cardItems = ref([
-  { id: `${Date.now()}`, title: '', description: '' }
-]);
-const images = ref([]);
-console.log(images.length);
+const nuxtApp = useNuxtApp();
 
-function addCardItem() {
-  const newItem = { id: `${Date.now()}`, title: '', description: '' };
+const images = ref([]);
+
+const cardItems = ref([
+  { id: `${Date.now()}`, title: '12', description: '', images: '' }
+]);
+
+async function addCardItem() {
+  if(cardItems.value[cardItems.value.length-1].title == ''){
+    return alertError('Missing required fields in the last element')
+  }
+  if(cardItems.value.length == 8){
+    return alertError('You are trying to go beyond the number of items in the carousel')
+  }
+  const newItem = { id: `${Date.now()}`, title: '', description: '', images: '' };
   cardItems.value.push(newItem);
 }
-
+async function alertError(textErrot){
+  await nuxtApp.$alert.show(textErrot, {
+                type: 'error',
+                timeout: 5000,
+    });
+}
 function deleteCardItem(itemId) {
+  if(cardItems.value.length <= 2) {
+    return alertError('The desired size is not suitable for the subsequent carousel')
+  }
   const index = cardItems.value.findIndex(item => item.id === itemId);
   if (index !== -1) {
-    cardItems.value.splice(index, 1)
+    cardItems.value = cardItems.value.filter(item => item.id !== itemId);
   }
 }
-
+function updateImages(id, newImages) {
+  const index = cardItems.value.findIndex(item => item.id === id);
+  const jsonString = JSON.stringify(newImages[0]);
+  const regularObject = JSON.parse(jsonString);
+  if(index != -1){
+    cardItems.value[index].images = regularObject;
+  }
+}
 function handleImageError(error) {
-  // Handle image upload error if needed
   console.error('Image upload error:', error);
-}
-
-function handleImagesSelection(selectedImages) {
-  // Update the list of selected images
-  images.value = selectedImages;
-}
-function fileUrl(file) {
-  if (file instanceof Blob) {
-    return URL.createObjectURL(file);
-  } else {
-    console.error('Invalid file object:', file);
-    return '';
-  }
 }
 </script>
   
@@ -90,7 +86,7 @@ function fileUrl(file) {
   transition: .3s;
 }
 
-.list-move,   
+.list-move,
 .list-enter-active,
 .list-leave-active {
   transition: all 0.5s ease;
@@ -100,7 +96,9 @@ function fileUrl(file) {
 .list-leave-to {
   opacity: 0;
   transform: translateX(30px);
-}.list-leave-active {
+}
+
+.list-leave-active {
   position: absolute;
 }
 
@@ -113,19 +111,23 @@ function fileUrl(file) {
   padding: 16px;
 
 }
-.title-carousel{
+
+.title-carousel {
   font-size: 20px;
   color: rgba(106, 109, 143, 1);
 }
-.subtitle-carousel{
+
+.subtitle-carousel {
   font-size: 12px;
   color: rgba(106, 109, 143, 1);
   margin-bottom: 24px;
 }
-.btn-upload-img{
+
+.btn-upload-img {
   position: relative;
 }
-.opacity-uploader{
+
+.opacity-uploader {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -135,6 +137,7 @@ function fileUrl(file) {
   z-index: 10;
   opacity: 0;
 }
+
 .card-carousel-item {
   padding: 16px;
   width: 100%;
@@ -197,6 +200,7 @@ function fileUrl(file) {
   display: flex;
   justify-content: center;
   align-items: end;
+
   &:hover {
     background-color: rgba(56, 64, 91, 1);
 
