@@ -3213,7 +3213,6 @@ $name-font: 'Basis Grotesque Pro';
     letter-spacing: 0.014em;
     font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
     color: $secondary;
-    margin-top: -8px;
   }
 }
 .custom-condition-select {
